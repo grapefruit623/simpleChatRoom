@@ -15,22 +15,35 @@
  *
  * =====================================================================================
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <time.h>
 
-#define	BUFFSIZE 4096			/*  */
+#include "func.h"
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  echo
+ *  Description:  
+ * =====================================================================================
+ */
+		void
+echo ( int acceptId )
+{
+		char recvBuf[BUFFSIZE];
+		char sendBuf[BUFFSIZE];
+
+//		if ( login( acceptId, recvBuf ) ) {
+//				printf ( "login success\n" );
+				while ( 0 < read(acceptId, recvBuf, BUFFSIZE) ) {
+						printf ( ">>%s\n", recvBuf );
+						write(acceptId, recvBuf, BUFFSIZE);
+						bzero(recvBuf, BUFFSIZE);
+				}
+//		}
+//		else {
+//				printf ( "login failed\n" );
+//		}
+		return ;
+}		/* -----  end of function echo  ----- */
 /* 
  * ===  FUNCTION  ======================================================================
  *         Name:  sigFork
@@ -43,6 +56,7 @@ sigFork ( int sig )
 		pid_t pid;
 		int stat;
 		pid = waitpid(-1, &stat, 0);
+		printf ( "pid: %d\n", pid );
 		return ;
 }		/* -----  end of function sigFork  ----- */
 /* 
@@ -104,9 +118,7 @@ main ( int argc, char *argv[] )
 										fprintf(stderr, "accept fail: %s\n", strerror(errno));
 								}
 								else {
-
-										printf ( "a request from: %s\n", ip );
-										write(acceptId, endBuf, sizeof(endBuf));
+										echo(acceptId);
 										exit(1);
 								}
 						}
