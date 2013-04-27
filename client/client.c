@@ -45,15 +45,18 @@ str_cli ( int out, int in, int sockfd )
 		bzero(&recvLine, BUFSIZE);
 		bzero(&sendLine, BUFSIZE);
 
-//		n = read(sockfd, recvLine, BUFSIZE );
-//		write(out, recvLine, BUFSIZE );
+		n = read(sockfd, recvLine, BUFSIZE );
+		recvLine[n] = '\0';
+		write(out, recvLine, BUFSIZE );
 		while ( 0 < ( n = read(in, sendLine, BUFSIZE ))  ) {
 				
 				sendLine[n-1] = '\0';
 				write(sockfd, sendLine, BUFSIZE );
+				bzero(recvLine, BUFSIZE);
 
-				if ( 0 > read( sockfd, recvLine, BUFSIZE) )
+				if ( 0 > ( n = read( sockfd, recvLine, BUFSIZE) ) )
 						fprintf(stderr, "server is terminated");
+				recvLine[n] = '\0';
 				write(out, recvLine, BUFSIZE);
 		}
 		return ;

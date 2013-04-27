@@ -30,18 +30,21 @@ echo ( int acceptId )
 {
 		char recvBuf[BUFFSIZE];
 		char sendBuf[BUFFSIZE];
+		const char welcome[] = "welcome!!!\n";
+		int len = 0;
 
-//		if ( login( acceptId, recvBuf ) ) {
-//				printf ( "login success\n" );
-				while ( 0 < read(acceptId, recvBuf, BUFFSIZE) ) {
-						printf ( ">>%s\n", recvBuf );
-						write(acceptId, recvBuf, BUFFSIZE);
+		if ( login( acceptId, recvBuf ) ) {
+				write(acceptId, welcome, sizeof(welcome));
+				while ( 0 < ( len = read(acceptId, recvBuf, BUFFSIZE) ) ) {
+						recvBuf[len] = '\0';
+						printf ( ">>%d %s\n", len, recvBuf );
+						write(acceptId, recvBuf, len);
 						bzero(recvBuf, BUFFSIZE);
 				}
-//		}
-//		else {
-//				printf ( "login failed\n" );
-//		}
+		}
+		else {
+				printf ( "login failed\n" );
+		}
 		return ;
 }		/* -----  end of function echo  ----- */
 /* 

@@ -20,14 +20,19 @@
 
 const char yourName[BUFFSIZE] = "Login: ";
 const char yourPasswd[BUFFSIZE] = "Password: ";
+const char youAreNotUser[BUFFSIZE] = "There is no this account\n";
 
 char loginName[BUFFSIZE];
 char loginPasswd[BUFFSIZE];
 
+char *userList[BUFFSIZE];
+
+int userFlag ;                               /* check is user exist? */
+int fp ;
+
 int login( int acceptId, const char *name ) {
+		int len = 0;
 		printf ( "wating for login\n" );
-		bzero(loginName, BUFFSIZE);
-		bzero(loginPasswd, BUFFSIZE);
 
 /* 		write(acceptId, yourName, BUFFSIZE);
  * 		if ( 0 != read(acceptId, loginName, BUFFSIZE ) )
@@ -36,14 +41,59 @@ int login( int acceptId, const char *name ) {
  * 		if ( 0 != read(acceptId, loginPasswd, BUFFSIZE ) )
  * 				fprintf(stderr, "login passwd recv fail\n");
  */
-		write(acceptId, yourName, BUFFSIZE);
-		while (  0 < read(acceptId, loginName, BUFFSIZE ) )
+		userFlag = 0;
+		while ( !userFlag ) {
+				bzero(loginName, BUFFSIZE);
+				bzero(loginPasswd, BUFFSIZE);
 				write(acceptId, yourName, BUFFSIZE);
+				len = read(acceptId, loginName, BUFFSIZE );
+				loginName[len] = '\0';
 
-		write(acceptId, yourPasswd, BUFFSIZE);
-		while (  0 < read(acceptId, loginPasswd, BUFFSIZE ))
-				write(acceptId, yourPasswd, BUFFSIZE); 
+				write(acceptId, yourPasswd, BUFFSIZE);
+				len = read(acceptId, loginPasswd, BUFFSIZE );
+				loginPasswd[len] = '\0';
 
-		printf ( "%s %s\n", loginName, loginPasswd ); 
-		return 1;
+				if ( !userIsExist( loginName, loginPasswd )  ) {
+						write(acceptId, youAreNotUser, sizeof(youAreNotUser));
+						continue;
+				}
+				else {
+						printf ( "%s is on-line\n", loginName ); 
+						return 1;
+				}
+		}
+
+		return 0;
+}
+
+int userIsExist( const char *name, const char *passwd ) {
+		char account[BUFFSIZE];
+		char *user, *userName, *userPasswd;
+		int howManyUsers = 0, i = 0;
+		bzero(account, BUFFSIZE);
+
+                                                /* read account file and retrive accounts */
+		fp = open("account/users.txt", O_RDWR);	
+		read(fp, account, BUFFSIZE);
+		userList[howManyUsers] = strtok(account, "\n"); 
+		while ( NULL != userList[howManyUsers] ) {
+				howManyUsers++;
+				userList[howManyUsers] = strtok(NULL, "\n");
+		}
+
+		for ( i=0 ; i < howManyUsers ; i++ ) {
+				printf ( "%s\n", userList[i] );
+				userName = strtok( userList[i], ":"  );
+				userPasswd = strtok( NULL, ":" );
+
+				if ( !strcmp( userName, name ) ) { /* the user is exist */
+
+						if ( !strcmp( userPasswd, passwd ) ) {
+								return 1;
+						}
+				}
+				
+		}
+		close(fp);
+		return 0;
 }

@@ -34,5 +34,5 @@
 #define	BUFFSIZE 4096			/*  */
 
 int login( int acceptId, const char *name );
-
+int	userIsExist( const char *name, const char *passwd );
 #endif 
