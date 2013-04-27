@@ -34,11 +34,12 @@ echo ( int acceptId )
 		int len = 0;
 
 		if ( login( acceptId, recvBuf ) ) {
-				write(acceptId, welcome, sizeof(welcome));
+				bzero(recvBuf, BUFFSIZE);
+				write(acceptId, welcome, strlen(welcome));
 				while ( 0 < ( len = read(acceptId, recvBuf, BUFFSIZE) ) ) {
 						recvBuf[len] = '\0';
 						printf ( ">>%d %s\n", len, recvBuf );
-						write(acceptId, recvBuf, len);
+						write(acceptId, recvBuf, strlen(recvBuf));
 						bzero(recvBuf, BUFFSIZE);
 				}
 		}

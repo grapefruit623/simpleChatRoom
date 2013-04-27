@@ -42,22 +42,23 @@ str_cli ( int out, int in, int sockfd )
 		int n;
 		char sendLine[BUFSIZE], recvLine[BUFSIZE];
 
-		bzero(&recvLine, BUFSIZE);
-		bzero(&sendLine, BUFSIZE);
+		bzero(recvLine, BUFSIZE);
+		bzero(sendLine, BUFSIZE);
 
 		n = read(sockfd, recvLine, BUFSIZE );
 		recvLine[n] = '\0';
-		write(out, recvLine, BUFSIZE );
+		write(out, recvLine, strlen(recvLine) );
 		while ( 0 < ( n = read(in, sendLine, BUFSIZE ))  ) {
 				
-				sendLine[n-1] = '\0';
-				write(sockfd, sendLine, BUFSIZE );
+				sendLine[n-1] = '\0';           /* to elimate '\0' */
+				write(sockfd, sendLine, strlen(sendLine) );
 				bzero(recvLine, BUFSIZE);
 
 				if ( 0 > ( n = read( sockfd, recvLine, BUFSIZE) ) )
 						fprintf(stderr, "server is terminated");
+				printf ( "n = %d\n", n );
 				recvLine[n] = '\0';
-				write(out, recvLine, BUFSIZE);
+				write(out, recvLine, strlen(recvLine));
 		}
 		return ;
 }		/* -----  end of function str_cli  ----- */

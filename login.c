@@ -45,16 +45,16 @@ int login( int acceptId, const char *name ) {
 		while ( !userFlag ) {
 				bzero(loginName, BUFFSIZE);
 				bzero(loginPasswd, BUFFSIZE);
-				write(acceptId, yourName, BUFFSIZE);
+				write(acceptId, yourName, strlen(yourName));
 				len = read(acceptId, loginName, BUFFSIZE );
-				loginName[len] = '\0';
+				loginName[strlen(loginName)] = '\0';
 
-				write(acceptId, yourPasswd, BUFFSIZE);
+				write(acceptId, yourPasswd, strlen(yourPasswd));
 				len = read(acceptId, loginPasswd, BUFFSIZE );
-				loginPasswd[len] = '\0';
+				loginPasswd[strlen(loginPasswd)] = '\0';
 
 				if ( !userIsExist( loginName, loginPasswd )  ) {
-						write(acceptId, youAreNotUser, sizeof(youAreNotUser));
+						write(acceptId, youAreNotUser, strlen(youAreNotUser));
 						continue;
 				}
 				else {
