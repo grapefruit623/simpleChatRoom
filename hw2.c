@@ -55,6 +55,7 @@ echo ( int acceptId )
  *  Description:  to avoid zombile 
  * =====================================================================================
  */
+
 		void
 sigFork ( int sig )
 {
@@ -119,6 +120,7 @@ main ( int argc, char *argv[] )
 		FD_ZERO(&allset);
 		FD_SET(socketId, &allset);
 
+		initial();                              /* to initial setting */
 		for ( ; ; ) {
 				rset = allset;
 				nready = select(maxfd+1, &rset, NULL, NULL, NULL);
@@ -161,12 +163,15 @@ main ( int argc, char *argv[] )
 										client[i] = -1;
 								}
 								else {
-//										if ( !strcmp(buf, "connectReq") ) {
-//												echo(sockfd);
-//										}
-										buf[strlen(buf)] = '\0';
-										printf ( "\tget buf: %s\n", buf );
-										write(sockfd, buf, strlen(buf));
+										if ( !strcmp(buf, "connectReq") ) { /* handShake?? */
+												buf[strlen(buf)] = '\0';
+												requestHandler(sockfd, buf);
+										}
+										else {
+												buf[strlen(buf)] = '\0';
+												requestHandler(sockfd, buf);
+										}
+//										write(sockfd, buf, strlen(buf));
 								}
 
 								if ( 0 >= --nready )
@@ -174,31 +179,6 @@ main ( int argc, char *argv[] )
 						}
 				}
 		}
-//		while ( 1 ) {
-//				acceptId = accept(socketId, (struct sockaddr *)&clientInfo, &len);
-//				strcpy(ip, inet_ntoa(clientInfo.sin_addr )); /* to get ipv4 */
-//				forkId = fork();
-//				if ( 0 > forkId ) {
-//						fprintf(stderr, "fork failed\n");
-//				}
-//				else {
-//						
-//						if ( 0 == forkId ) {    /* son */
-//								if ( -1 == acceptId ) {
-//										fprintf(stderr, "accept fail: %s\n", strerror(errno));
-//								}
-//								else {
-//										echo(acceptId);
-//										exit(1);
-//								}
-//						}
-//						else {                  /* father */
-////								fprintf(stdout, "I am your father\n");
-//						}
-//				}
-//
-//				close(acceptId);
-//		}
 		
 		close(socketId);	
 		close(acceptId);

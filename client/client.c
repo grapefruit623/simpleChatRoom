@@ -67,7 +67,7 @@ str_cli ( int out, int in, int sockfd )
 									return ;	
 						}
 						if ( !strcmp(sendLine, "\n") ) {
-								printf ( "n = %d\n", strlen(sendLine) );
+//								printf ( "n = %d\n", strlen(sendLine) );
 								sendLine[1] = '\0';
 						}
 						else {
