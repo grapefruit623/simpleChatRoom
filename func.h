@@ -53,8 +53,9 @@ struct user {
 		char name[BUFFSIZE];
 		char passwd[BUFFSIZE];
 		int socket;
+		int toSomeone;
 		int stage;
-		Message offLineMesg;	
+		Message *offLineMesg;	
 };				/* ----------  end of struct user  ---------- */
 
 typedef struct user User;
