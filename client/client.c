@@ -45,9 +45,9 @@ str_cli ( int out, int in, int sockfd )
 		bzero(recvLine, BUFSIZE);
 		bzero(sendLine, BUFSIZE);
 
-//		n = read(sockfd, recvLine, BUFSIZE );
-//		recvLine[n] = '\0';
-//		write(out, recvLine, strlen(recvLine) );
+		n = read(in, sendLine, BUFSIZE );
+		sendLine[n] = '\0';
+		write(sockfd, sendLine, strlen(sendLine) );
 		while ( 0 < ( n = read(sockfd, recvLine, BUFSIZE ))  ) {
 
 				write(out, recvLine, BUFSIZE );

@@ -31,6 +31,7 @@ echo ( int acceptId )
 		char recvBuf[BUFFSIZE];
 		char sendBuf[BUFFSIZE];
 		const char welcome[] = "welcome!!!\n";
+		const char cmdChar[] = ">>";
 		int len = 0;
 
 		if ( login( acceptId, recvBuf ) ) {
@@ -76,11 +77,12 @@ main ( int argc, char *argv[] )
 		struct sockaddr_in clientInfo;
 		socklen_t len = sizeof(clientInfo);
 		int socketId = socket(AF_INET, SOCK_STREAM, 0);
-		int bindId;
 		int port = 8051;
-		int acceptId;
-		int forkId;
-		char endBuf[] = "<html><body> <h1> hello world </h1> </body></html>";
+		int bindId, acceptId, forkId;
+		int i, n, maxi, maxfd, listenfd, sockfd;
+		int nready, client[FD_SETSIZE];
+		fd_set rset, allset;
+		char buf[BUFFSIZE];
 		char ip[64];
 
 
@@ -108,31 +110,92 @@ main ( int argc, char *argv[] )
 				fprintf(stderr, "listening failed\n");
 				return 0;
 		}
-		while ( 1 ) {
-				acceptId = accept(socketId, (struct sockaddr *)&clientInfo, &len);
-				strcpy(ip, inet_ntoa(clientInfo.sin_addr )); /* to get ipv4 */
-				forkId = fork();
-				if ( 0 > forkId ) {
-						fprintf(stderr, "fork failed\n");
+		maxfd = socketId;
+		maxi = -1;
+
+		for ( i=0; i<FD_SETSIZE ; i++ ) {
+				client[i] = -1;
+		}
+		FD_ZERO(&allset);
+		FD_SET(socketId, &allset);
+
+		for ( ; ; ) {
+				rset = allset;
+				nready = select(maxfd+1, &rset, NULL, NULL, NULL);
+				if ( FD_ISSET(socketId, &rset) ) {
+						acceptId = accept(socketId, (struct sockaddr *)&clientInfo, &len);
+						strcpy(ip, inet_ntoa(clientInfo.sin_addr));
+						printf ( "new client: %s\n", ip );
+
+
+						for ( i=0; i<FD_SETSIZE ; i++ ) {
+
+								if ( client[i] < 0 ) {
+										client[i] = acceptId;
+										break;
+								}
+						}
+
+						if ( FD_SETSIZE == i )
+								fprintf(stderr, "too many clients");
+
+						FD_SET(acceptId, &allset);
+						if ( acceptId > maxfd )
+								maxfd = acceptId;
+
+						if ( i > maxi )
+								maxi = i;
+
+						if ( 0 >= --nready )
+								continue;
 				}
-				else {
+				for ( i=0; i <= maxi ; i++ ) {
 						
-						if ( 0 == forkId ) {    /* son */
-								if ( -1 == acceptId ) {
-										fprintf(stderr, "accept fail: %s\n", strerror(errno));
+						if ( 0 > ( sockfd = client[i] ) )
+								continue;
+
+						if ( FD_ISSET( sockfd, &rset) ) {
+
+								if ( 0 == ( n = read(sockfd, buf, BUFFSIZE) ) ) {
+										close(sockfd);
+										FD_CLR(sockfd, &allset);
+										client[i] = -1;
 								}
 								else {
-										echo(acceptId);
-										exit(1);
+										write(sockfd, buf, n);
 								}
-						}
-						else {                  /* father */
-//								fprintf(stdout, "I am your father\n");
+
+								if ( 0 >= --nready )
+										break;
 						}
 				}
-
-				close(acceptId);
 		}
+//		while ( 1 ) {
+//				acceptId = accept(socketId, (struct sockaddr *)&clientInfo, &len);
+//				strcpy(ip, inet_ntoa(clientInfo.sin_addr )); /* to get ipv4 */
+//				forkId = fork();
+//				if ( 0 > forkId ) {
+//						fprintf(stderr, "fork failed\n");
+//				}
+//				else {
+//						
+//						if ( 0 == forkId ) {    /* son */
+//								if ( -1 == acceptId ) {
+//										fprintf(stderr, "accept fail: %s\n", strerror(errno));
+//								}
+//								else {
+//										echo(acceptId);
+//										exit(1);
+//								}
+//						}
+//						else {                  /* father */
+////								fprintf(stdout, "I am your father\n");
+//						}
+//				}
+//
+//				close(acceptId);
+//		}
+		
 		close(socketId);	
 		close(acceptId);
 		return EXIT_SUCCESS;

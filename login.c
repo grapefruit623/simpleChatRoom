@@ -18,9 +18,9 @@
 
 #include "func.h"
 
-const char yourName[BUFFSIZE] = "Login:";
-const char yourPasswd[BUFFSIZE] = "Password:";
-const char youAreNotUser[BUFFSIZE] = "There is no this account\n Login:";
+const char yourName[BUFFSIZE] = ">>Login:";
+const char yourPasswd[BUFFSIZE] = ">>Password:";
+const char youAreNotUser[BUFFSIZE] = ">>There is no this account\n>>Login:";
 
 char loginName[BUFFSIZE];
 char loginPasswd[BUFFSIZE];
