@@ -169,7 +169,7 @@ requestHandler( int sockfd, char *incomingMes)
 								for ( j=0; j<i ; j++ ) {
 										cmd[j] = cmdBuf[j];
 								}
-								cmd[j+1] = '\0';
+								cmd[j] = '\0';
 								for ( j=i+1; j<strlen(cmdBuf) ; j++ ) {
 										userSay[j-i-1] = cmdBuf[j];
 								}
@@ -191,7 +191,7 @@ requestHandler( int sockfd, char *incomingMes)
 						}
 						return 1;
 				}
-				if ( !strcmp("send", cmd) ) {
+				if ( !strcmp("send", cmd) ) {   /* to cut send name message */
 						
 						strcpy(cmdBuf, userSay);
 						bzero(userSay, strlen(userSay));
@@ -228,7 +228,7 @@ requestHandler( int sockfd, char *incomingMes)
 										else {
 												if (  offLine == allUsers[i].stage ) {
 														write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
-														write(allUsers[i].socket, "\n", strlen("\n")); 
+														write(sockfd, "\n", strlen("\n")); 
 														return 1;
 												}
 										}
