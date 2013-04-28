@@ -39,15 +39,38 @@
 		void
 str_cli ( int out, int in, int sockfd )
 {
-		int n;
+		int n, maxfd;
+		fd_set rset;
 		char sendLine[BUFSIZE], recvLine[BUFSIZE];
 
 		bzero(recvLine, BUFSIZE);
 		bzero(sendLine, BUFSIZE);
 
-		n = read(in, sendLine, BUFSIZE );
-		sendLine[n] = '\0';
-		write(sockfd, sendLine, strlen(sendLine) );
+//		FD_ZERO(&rset);
+//
+//		for ( ; ; ) {
+//				FD_SET(in, &rset);
+//				FD_SET(sockfd, &rset);
+//				maxfd = (sockfd>in)?sockfd:in;
+//				select(maxfd, &rset, NULL, NULL, NULL);
+//
+//				if ( FD_ISSET(sockfd, &rset) ) {
+//						printf ( "sock\n" );
+//						if ( 0 == read(sockfd, recvLine, BUFSIZE) ) {
+//								fprintf(stderr, "server terminated");
+//								return ;
+//						}
+//						write(out, recvLine, strlen(recvLine));
+//				}
+//				if ( FD_ISSET(in, &rset) ) {
+//						printf ( "in\n" );
+//						if ( 0 == read(in, sendLine, BUFSIZE) ) {
+//									return ;	
+//						}
+//						write(sockfd, sendLine, strlen(sendLine));
+//				}
+//		}
+		write(sockfd, "connectReq", strlen("connectReq") ); /* send connect req to server */
 		while ( 0 < ( n = read(sockfd, recvLine, BUFSIZE ))  ) {
 
 				write(out, recvLine, BUFSIZE );
@@ -62,11 +85,6 @@ str_cli ( int out, int in, int sockfd )
 				write(sockfd, sendLine, BUFSIZE );
 				bzero(recvLine, BUFSIZE);
 				bzero(sendLine, BUFSIZE);
-
-//				if ( 0 > ( n = read( sockfd, recvLine, BUFSIZE) ) )
-//						fprintf(stderr, "server is terminated");
-//				recvLine[strlen(recvLine)] = '\0';
-//				write(out, recvLine, strlen(recvLine));
 		}
 		return ;
 }		/* -----  end of function str_cli  ----- */

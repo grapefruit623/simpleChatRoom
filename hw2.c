@@ -150,7 +150,6 @@ main ( int argc, char *argv[] )
 								continue;
 				}
 				for ( i=0; i <= maxi ; i++ ) {
-						
 						if ( 0 > ( sockfd = client[i] ) )
 								continue;
 
@@ -162,7 +161,10 @@ main ( int argc, char *argv[] )
 										client[i] = -1;
 								}
 								else {
-										write(sockfd, buf, n);
+//										if ( !strcmp(buf, "connectReq") ) {
+//												echo(sockfd);
+//										}
+										write(sockfd, buf, strlen(buf));
 								}
 
 								if ( 0 >= --nready )
