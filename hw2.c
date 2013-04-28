@@ -154,7 +154,7 @@ main ( int argc, char *argv[] )
 								continue;
 
 						if ( FD_ISSET( sockfd, &rset) ) {
-
+								bzero(buf, BUFFSIZE);
 								if ( 0 == ( n = read(sockfd, buf, BUFFSIZE) ) ) {
 										close(sockfd);
 										FD_CLR(sockfd, &allset);
@@ -164,6 +164,8 @@ main ( int argc, char *argv[] )
 //										if ( !strcmp(buf, "connectReq") ) {
 //												echo(sockfd);
 //										}
+										buf[strlen(buf)] = '\0';
+										printf ( "\tget buf: %s\n", buf );
 										write(sockfd, buf, strlen(buf));
 								}
 
