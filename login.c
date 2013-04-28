@@ -18,9 +18,9 @@
 
 #include "func.h"
 
-const char yourName[BUFFSIZE] = "Login: ";
-const char yourPasswd[BUFFSIZE] = "Password: ";
-const char youAreNotUser[BUFFSIZE] = "There is no this account\n";
+const char yourName[BUFFSIZE] = "Login:";
+const char yourPasswd[BUFFSIZE] = "Password:";
+const char youAreNotUser[BUFFSIZE] = "There is no this account\n Login:";
 
 char loginName[BUFFSIZE];
 char loginPasswd[BUFFSIZE];
@@ -42,10 +42,15 @@ int login( int acceptId, const char *name ) {
  * 				fprintf(stderr, "login passwd recv fail\n");
  */
 		userFlag = 0;
-		while ( !userFlag ) {
+		while ( 1 ) {
 				bzero(loginName, BUFFSIZE);
 				bzero(loginPasswd, BUFFSIZE);
-				write(acceptId, yourName, strlen(yourName));
+				if ( !userFlag)                 /* the connect have been wrong account? */
+						write(acceptId, yourName, strlen(yourName));
+				else {
+						write(acceptId, youAreNotUser, strlen(youAreNotUser));
+						userFlag = 0;
+				}
 				len = read(acceptId, loginName, BUFFSIZE );
 				loginName[strlen(loginName)] = '\0';
 
@@ -54,7 +59,9 @@ int login( int acceptId, const char *name ) {
 				loginPasswd[strlen(loginPasswd)] = '\0';
 
 				if ( !userIsExist( loginName, loginPasswd )  ) {
-						write(acceptId, youAreNotUser, strlen(youAreNotUser));
+						printf ( "not exist %s %s\n", loginName, loginPasswd );
+						userFlag = 1;
+//						write(acceptId, youAreNotUser, strlen(youAreNotUser));
 						continue;
 				}
 				else {

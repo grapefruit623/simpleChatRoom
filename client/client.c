@@ -45,20 +45,28 @@ str_cli ( int out, int in, int sockfd )
 		bzero(recvLine, BUFSIZE);
 		bzero(sendLine, BUFSIZE);
 
-		n = read(sockfd, recvLine, BUFSIZE );
-		recvLine[n] = '\0';
-		write(out, recvLine, strlen(recvLine) );
-		while ( 0 < ( n = read(in, sendLine, BUFSIZE ))  ) {
-				
-				sendLine[n-1] = '\0';           /* to elimate '\0' */
-				write(sockfd, sendLine, strlen(sendLine) );
-				bzero(recvLine, BUFSIZE);
+//		n = read(sockfd, recvLine, BUFSIZE );
+//		recvLine[n] = '\0';
+//		write(out, recvLine, strlen(recvLine) );
+		while ( 0 < ( n = read(sockfd, recvLine, BUFSIZE ))  ) {
 
-				if ( 0 > ( n = read( sockfd, recvLine, BUFSIZE) ) )
-						fprintf(stderr, "server is terminated");
-				printf ( "n = %d\n", n );
-				recvLine[n] = '\0';
-				write(out, recvLine, strlen(recvLine));
+				write(out, recvLine, BUFSIZE );
+				read(in, sendLine, BUFSIZE);
+				if ( !strcmp(sendLine, "\n") ) {
+						printf ( "n = %d\n", strlen(sendLine) );
+						sendLine[1] = '\0';
+				}
+				else {
+						sendLine[strlen(sendLine)-1] = '\0';           /* to elimate '\n' */
+				}
+				write(sockfd, sendLine, BUFSIZE );
+				bzero(recvLine, BUFSIZE);
+				bzero(sendLine, BUFSIZE);
+
+//				if ( 0 > ( n = read( sockfd, recvLine, BUFSIZE) ) )
+//						fprintf(stderr, "server is terminated");
+//				recvLine[strlen(recvLine)] = '\0';
+//				write(out, recvLine, strlen(recvLine));
 		}
 		return ;
 }		/* -----  end of function str_cli  ----- */
