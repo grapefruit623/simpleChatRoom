@@ -27,6 +27,9 @@ const char youAreNotUser[BUFFSIZE] = ">>There is no this account\n\0";
 const char yourAreLogout[BUFFSIZE] = "Your Are Logout\n\0"; 
 const char youAreOnline[BUFFSIZE] = ">>Your Are on-line, in cmd mode\n\0";
 const char youHaveBeenOnline[BUFFSIZE] = "You have been on-line\n\0";
+const char theOneIsTalking[BUFFSIZE] = "he/she is talking with someone";
+const char leaveChat[BUFFSIZE] = "leaving the chat mode";
+const char youInChatMode[BUFFSIZE] = "Now you locate at the chat mode";
 const char cmdPrompt[BUFFSIZE] = ">>\0";
 /* 
  * ===  FUNCTION  ======================================================================
@@ -131,7 +134,7 @@ requestHandler( int sockfd, char *incomingMes)
 								allUsers[sockfd].socket = sockfd;
 								allUsers[sockfd].serverCache = i; /* the index of user on the account data  */
 
-								for ( j=0; j<= matching[i].howManyOffLine ; j++ ) {
+								for ( j=0; j<= matching[i].howManyOffLine ; j++ ) { /* show off-line mesg */
 										bzero(cmdBuf, strlen(cmdBuf));
 										strcpy(cmdBuf, matching[i].offLineMesg[j].mes);
 										strcat(cmdBuf, " from ");
@@ -159,7 +162,8 @@ requestHandler( int sockfd, char *incomingMes)
 				if ( !strcmp("logout", incomingMes) ) { /* logout */
 						write( sockfd, yourAreLogout, strlen(yourAreLogout));
 						allUsers[sockfd].stage = offLine;
-//						allUsers[sockfd].socket = -1;
+						strcpy(allUsers[sockfd].name, "offLine");
+						strcpy(allUsers[sockfd].passwd, "offLine");
 						return 1;
 				}
 				if ( !strcmp("list", incomingMes)  ) { /* list online user */
@@ -211,13 +215,11 @@ requestHandler( int sockfd, char *incomingMes)
 						}
 						return 1;
 				}
-				if ( !strcmp("send", cmd) ) {   /* to cut send name message */
-						
+				if ( !strcmp("send", cmd) ) {   						
 						strcpy(cmdBuf, userSay);
 						bzero(userSay, strlen(userSay));
 						bzero(cmd, strlen(cmd));
-						for ( i=0; i<strlen(cmdBuf) ;i++ ) {
-
+						for ( i=0; i<strlen(cmdBuf) ;i++ ) { /* to cut send name message */
 								if ( ' ' == cmdBuf[i] ) {
 
 										for ( j=0; j<i ; j++ ) {
@@ -267,13 +269,54 @@ requestHandler( int sockfd, char *incomingMes)
 						return 1;
 
 				}
+
+				if ( !strcmp("talk", cmd) ) {
+						printf ( "%s\n", userSay );
+						for ( i = 0; i < userCanHandle ; i++ ) {
+								if  ( !strcmp(allUsers[i].name, userSay) ) { /* search on-line user */
+										if ( cmdMode == allUsers[i].stage  )  { /* he/she is not in talk */
+												allUsers[i].stage = chatMode;
+												allUsers[sockfd].stage = chatMode;
+												allUsers[i].toSomeone = sockfd;
+												allUsers[sockfd].toSomeone = i;
+												write(sockfd, youInChatMode, strlen(youInChatMode)); /* to tell user, locate at chat mode */
+												write(sockfd, "\n", strlen("\n")); 
+												write(i, youInChatMode, strlen(youInChatMode)); /* to tell user, locate at chat mode */
+												write(i, "\n", strlen("\n")); 
+												return 1;
+										}
+										else {
+												write(sockfd, theOneIsTalking, strlen(theOneIsTalking));
+												return 1;
+										}
+								}
+						}
+						write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
+						write(sockfd, "\n", strlen("\n")); 
+						return 1;
+				}
 				write(sockfd, cmdPrompt, strlen(cmdPrompt));
-                                                /* echo */
-//				write(sockfd, cmdPrompt, strlen(cmdPrompt));
-//				write(sockfd, incomingMes, strlen(incomingMes));
-//				write(sockfd, "\n", strlen("\n"));
 
 				return 1;
+		}
+
+		if ( chatMode == allUsers[sockfd].stage ) { /* to send mes to another on-line user */
+				write(sockfd, cmdPrompt, strlen(cmdPrompt));
+				if ( !strcmp("#exit", incomingMes) ) {
+						allUsers[sockfd].stage = cmdMode;
+						allUsers[ allUsers[sockfd].toSomeone ].stage = cmdMode;
+						write(allUsers[sockfd].toSomeone, leaveChat, strlen(leaveChat)); /* tell user has left the chat mode */
+						write(allUsers[sockfd].toSomeone, "\n", strlen("\n")); 
+						write(sockfd, leaveChat, strlen(leaveChat)); /* tell user has left the chat mode */
+						write(sockfd, "\n", strlen("\n")); 
+						return 1;
+				}
+				write(allUsers[sockfd].toSomeone, "\n", strlen("\n")); 
+				write(allUsers[sockfd].toSomeone, allUsers[sockfd].name, strlen(allUsers[sockfd].name) );
+				write(allUsers[sockfd].toSomeone, ": ", strlen("\t: "));
+				write(allUsers[sockfd].toSomeone, incomingMes, strlen(incomingMes));
+				write(allUsers[sockfd].toSomeone, "\n", strlen("\n")); 
+				write(allUsers[sockfd].toSomeone, cmdPrompt, strlen(cmdPrompt));
 		}
 		return 0;
 }

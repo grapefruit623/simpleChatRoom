@@ -27,8 +27,30 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <termios.h>
 
 #define	BUFSIZE 4096			/*  */
+
+static struct termios stored_settings;
+
+void echo_off(void)
+{
+    struct termios new_settings;
+
+    tcgetattr(0,&stored_settings);
+    new_settings = stored_settings;
+    new_settings.c_lflag &= (~ECHO);
+    tcsetattr(0,TCSANOW,&new_settings);
+    return;
+}
+
+void echo_on(void)
+{
+
+    tcsetattr(0,TCSANOW,&stored_settings);
+    return;
+}
+
 
 /* 
  * ===  FUNCTION  ======================================================================
@@ -39,7 +61,7 @@
 		void
 str_cli ( int out, int in, int sockfd )
 {
-		int n, maxfd;
+		int n, maxfd, isPasswd = 0;
 		fd_set rset;
 		char sendLine[BUFSIZE], recvLine[BUFSIZE];
 
@@ -60,12 +82,26 @@ str_cli ( int out, int in, int sockfd )
 								fprintf(stderr, "server terminated");
 								return ;
 						}
+
+						if ( !strcmp(">>Password:", recvLine) )
+								isPasswd = 1;
 						write(out, recvLine, strlen(recvLine));
 				}
 				if ( FD_ISSET(in, &rset) ) {
+
+						if ( 1 == isPasswd )
+								echo_off();
+
 						if ( 0 == read(in, sendLine, BUFSIZE) ) {
 									return ;	
 						}
+
+
+						if ( 1 == isPasswd ) {
+								echo_on();
+								isPasswd = 0;
+						}
+
 						if ( !strcmp(sendLine, "\n") ) {
 //								printf ( "n = %d\n", strlen(sendLine) );
 								sendLine[1] = '\0';
@@ -78,22 +114,6 @@ str_cli ( int out, int in, int sockfd )
 				bzero(recvLine, BUFSIZE);
 				bzero(sendLine, BUFSIZE);
 		}
-//		write(sockfd, "connectReq", strlen("connectReq") ); /* send connect req to server */
-//		while ( 0 < ( n = read(sockfd, recvLine, BUFSIZE ))  ) {
-//
-//				write(out, recvLine, BUFSIZE );
-//				read(in, sendLine, BUFSIZE);
-//				if ( !strcmp(sendLine, "\n") ) {
-//						printf ( "n = %d\n", strlen(sendLine) );
-//						sendLine[1] = '\0';
-//				}
-//				else {
-//						sendLine[strlen(sendLine)-1] = '\0';           /* to elimate '\n' */
-//				}
-//				write(sockfd, sendLine, BUFSIZE );
-//				bzero(recvLine, BUFSIZE);
-//				bzero(sendLine, BUFSIZE);
-//		}
 		return ;
 }		/* -----  end of function str_cli  ----- */
 /* 
@@ -129,11 +149,6 @@ main ( int argc, char *argv[] )
 				fprintf(stderr, "connect fail\n");
 
 		str_cli(fileno(stdout), fileno(stdin), socketId);
-/* 		send( socketId, mes, sizeof(mes), 0 );
- * 		recv( socketId, recvBuf, 4096, 0 );
- * 
- * 		printf ( "%s\n", recvBuf );
- */
 
 
 		return EXIT_SUCCESS;
