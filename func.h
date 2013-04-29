@@ -44,7 +44,6 @@
 struct message {
 		char mes[BUFFSIZE];
 		char sender[BUFFSIZE];
-		struct message *next;
 };				/* ----------  end of struct message  ---------- */
 
 typedef struct message Message;
@@ -55,7 +54,7 @@ struct user {
 		int socket;
 		int toSomeone;
 		int stage;
-		Message *offLineMesg;	
+		int serverCache;
 };				/* ----------  end of struct user  ---------- */
 
 typedef struct user User;
@@ -63,6 +62,8 @@ typedef struct user User;
 struct account {
 		char name[BUFFSIZE];
 		char passwd[BUFFSIZE];
+		int howManyOffLine;
+		Message offLineMesg[10];	
 };				/* ----------  end of struct account  ---------- */
 
 typedef struct account Account;

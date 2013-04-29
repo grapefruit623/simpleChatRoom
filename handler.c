@@ -54,6 +54,7 @@ getAccount ( )
 				userPasswd = strtok( NULL, ":" );
 				strcpy(matching[i].name, userName);
 				strcpy(matching[i].passwd, userPasswd);
+				matching[i].howManyOffLine = -1;
 		}
 		close(fp);
 		return ;
@@ -72,9 +73,9 @@ initial ( )
 		getAccount();
 		for ( i = 0; i<userCanHandle ; i++ ) {
 				allUsers[i].stage = offLine;
-				allUsers[i].offLineMesg = NULL;
 				allUsers[i].socket = -1;
 				allUsers[i].toSomeone = -1;
+				allUsers[i].serverCache = -1;
 		}
 		return ;
 }		/* -----  end of function initial  ----- */
@@ -115,10 +116,10 @@ requestHandler( int sockfd, char *incomingMes)
 						if ( !strcmp(matching[i].name, name) && !strcmp(matching[i].passwd, passwd) ) { /* the user is exist on prebuilt file */
 								printf ( "hello %s, %s\n", name, passwd );
 
-								for ( i=0; i<userCanHandle ; i++ ) { /* check repeat log-in */
+								for ( j=0; j<userCanHandle ; j++ ) { /* check repeat log-in */
 
-										if ( !strcmp( allUsers[i].name, name) &&
-														( cmdMode == allUsers[i].stage || chatMode == allUsers[i].stage )) {
+										if ( !strcmp( allUsers[j].name, name) &&
+														( cmdMode == allUsers[j].stage || chatMode == allUsers[j].stage )) {
 												write(sockfd, youHaveBeenOnline, strlen(youHaveBeenOnline));
 												return 1;
 										}
@@ -128,6 +129,22 @@ requestHandler( int sockfd, char *incomingMes)
 								strcpy(allUsers[sockfd].name, name);
 								strcpy(allUsers[sockfd].passwd, passwd);
 								allUsers[sockfd].socket = sockfd;
+								allUsers[sockfd].serverCache = i; /* the index of user on the account data  */
+
+								for ( j=0; j<= matching[i].howManyOffLine ; j++ ) {
+										bzero(cmdBuf, strlen(cmdBuf));
+										strcpy(cmdBuf, matching[i].offLineMesg[j].mes);
+										strcat(cmdBuf, " from ");
+										strcat(cmdBuf, matching[i].offLineMesg[j].sender);
+										write(sockfd, cmdBuf, strlen(cmdBuf));
+										write(sockfd, "\n", strlen("\n")); 
+								}
+								matching[i].howManyOffLine = -1; 
+/* 								if ( NULL != matching[i].offLineMesg ) {
+ *
+ * 									There are bugs, even if printf
+ * 								}
+ */
 
 								printf ( "%s %d\n", allUsers[sockfd].name, sockfd );
 								return 1;
@@ -217,7 +234,7 @@ requestHandler( int sockfd, char *incomingMes)
 						printf ( "user want to talk to %s, to say %s\n", cmd, userSay );
 
 						for ( i = 0; i < userCanHandle ; i++ ) {
-								if  ( !strcmp(allUsers[i].name, cmd) ) { 
+								if  ( !strcmp(allUsers[i].name, cmd) ) { /* search on-line user */
 										if ( cmdMode == allUsers[i].stage || chatMode == allUsers[i].stage )  {
 												bzero(cmdBuf, strlen(cmdBuf));
 												strcpy(cmdBuf, userSay);
@@ -228,9 +245,16 @@ requestHandler( int sockfd, char *incomingMes)
 //												write(allUsers[i].socket, "\n", strlen("\n")); 
 												return 1;
 										}
-										else {
+										else {  /* he/she have benn on-line, but now is off-line */
 												printf ( "not on-line\n" );
 												printf ( "%d %s %d\n", i, allUsers[i].name, allUsers[i].stage );
+
+												j = allUsers[i].serverCache;
+												matching[j].howManyOffLine = ( ++matching[j].howManyOffLine ) % 10;
+												strcpy(matching[j].offLineMesg[ matching[j].howManyOffLine ].sender, allUsers[sockfd].name);
+												strcpy(matching[j].offLineMesg[ matching[j].howManyOffLine ].mes, userSay);
+
+
 												write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
 												write(sockfd, "\n", strlen("\n")); 
 												write(sockfd, cmdPrompt, strlen(cmdPrompt));
