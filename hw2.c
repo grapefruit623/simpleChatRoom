@@ -21,36 +21,6 @@
 
 /* 
  * ===  FUNCTION  ======================================================================
- *         Name:  echo
- *  Description:  
- * =====================================================================================
- */
-//		void
-//echo ( int acceptId )
-//{
-//		char recvBuf[BUFFSIZE];
-//		char sendBuf[BUFFSIZE];
-//		const char welcome[] = "welcome!!!\n";
-//		const char cmdChar[] = ">>";
-//		int len = 0;
-//
-//		if ( login( acceptId, recvBuf ) ) {
-//				bzero(recvBuf, BUFFSIZE);
-//				write(acceptId, welcome, strlen(welcome));
-//				while ( 0 < ( len = read(acceptId, recvBuf, BUFFSIZE) ) ) {
-//						recvBuf[len] = '\0';
-//						printf ( ">>%d %s\n", len, recvBuf );
-//						write(acceptId, recvBuf, strlen(recvBuf));
-//						bzero(recvBuf, BUFFSIZE);
-//				}
-//		}
-//		else {
-//				printf ( "login failed\n" );
-//		}
-//		return ;
-//}		/* -----  end of function echo  ----- */
-/* 
- * ===  FUNCTION  ======================================================================
  *         Name:  sigFork
  *  Description:  to avoid zombile 
  * =====================================================================================
@@ -158,6 +128,9 @@ main ( int argc, char *argv[] )
 						if ( FD_ISSET( sockfd, &rset) ) {
 								bzero(buf, BUFFSIZE);
 								if ( 0 == ( n = read(sockfd, buf, BUFFSIZE) ) ) {
+										strcpy(buf, "logout");
+										buf[strlen(buf)] = '\0';
+										requestHandler(sockfd, buf);
 										close(sockfd);
 										FD_CLR(sockfd, &allset);
 										client[i] = -1;

@@ -25,7 +25,7 @@ const char yourName[BUFFSIZE] = ">>Login:\0";
 const char yourPasswd[BUFFSIZE] = ">>Password:\0";
 const char youAreNotUser[BUFFSIZE] = ">>There is no this account\n\0";
 const char yourAreLogout[BUFFSIZE] = "Your Are Logout\n\0"; 
-const char youAreOnline[BUFFSIZE] = ">>Your Are on-line, in cmd mode\n\0";
+const char youAreOnline[BUFFSIZE] = "\n>>Your Are on-line, in cmd mode\n\0";
 const char youHaveBeenOnline[BUFFSIZE] = "You have been on-line\n\0";
 const char theOneIsTalking[BUFFSIZE] = "he/she is talking with someone";
 const char leaveChat[BUFFSIZE] = "leaving the chat mode";
@@ -273,7 +273,7 @@ requestHandler( int sockfd, char *incomingMes)
 
 				}
 
-				if ( !strcmp("talk", cmd) ) {
+				if ( !strcmp("talk", cmd) && strcmp(allUsers[sockfd].name, userSay) ) { /* talk and not talk himself */
 						printf ( "%s\n", userSay );
 						for ( i = 0; i < userCanHandle ; i++ ) {
 								if  ( !strcmp(allUsers[i].name, userSay) ) { /* search on-line user */
