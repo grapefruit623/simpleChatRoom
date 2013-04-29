@@ -247,23 +247,26 @@ requestHandler( int sockfd, char *incomingMes)
 //												write(allUsers[i].socket, "\n", strlen("\n")); 
 												return 1;
 										}
-										else {  /* he/she have benn on-line, but now is off-line */
-												printf ( "not on-line\n" );
-												printf ( "%d %s %d\n", i, allUsers[i].name, allUsers[i].stage );
-
-												j = allUsers[i].serverCache;
-												matching[j].howManyOffLine = ( ++matching[j].howManyOffLine ) % 10;
-												strcpy(matching[j].offLineMesg[ matching[j].howManyOffLine ].sender, allUsers[sockfd].name);
-												strcpy(matching[j].offLineMesg[ matching[j].howManyOffLine ].mes, userSay);
-
-
-												write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
-												write(sockfd, "\n", strlen("\n")); 
-												write(sockfd, cmdPrompt, strlen(cmdPrompt));
-												return 1;
-										}
 								}
 						}
+
+						for ( j=0; j < userCanHandle ; j++ ) {
+								if ( !strcmp(matching[j].name, cmd) ) {  /* he/she have benn on-line, but now is off-line */
+										printf ( "not on-line\n" );
+										printf ( "%d %s \n", j, matching[j].name );
+
+										matching[j].howManyOffLine = ( ++matching[j].howManyOffLine ) % 10;
+										strcpy(matching[j].offLineMesg[ matching[j].howManyOffLine ].sender, allUsers[sockfd].name);
+										strcpy(matching[j].offLineMesg[ matching[j].howManyOffLine ].mes, userSay);
+
+
+										write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
+										write(sockfd, "\n", strlen("\n")); 
+										write(sockfd, cmdPrompt, strlen(cmdPrompt));
+										return 1;
+								}
+						}
+
 						write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
 						write(sockfd, "\n", strlen("\n")); 
 						return 1;
@@ -313,7 +316,7 @@ requestHandler( int sockfd, char *incomingMes)
 				}
 				write(allUsers[sockfd].toSomeone, "\n", strlen("\n")); 
 				write(allUsers[sockfd].toSomeone, allUsers[sockfd].name, strlen(allUsers[sockfd].name) );
-				write(allUsers[sockfd].toSomeone, ": ", strlen("\t: "));
+				write(allUsers[sockfd].toSomeone, ": ", strlen(": "));
 				write(allUsers[sockfd].toSomeone, incomingMes, strlen(incomingMes));
 				write(allUsers[sockfd].toSomeone, "\n", strlen("\n")); 
 				write(allUsers[sockfd].toSomeone, cmdPrompt, strlen(cmdPrompt));

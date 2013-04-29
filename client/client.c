@@ -83,24 +83,24 @@ str_cli ( int out, int in, int sockfd )
 								return ;
 						}
 
-						if ( !strcmp(">>Password:", recvLine) )
-								isPasswd = 1;
+//						if ( !strcmp(">>Password:", recvLine) )
+//								isPasswd = 1;
 						write(out, recvLine, strlen(recvLine));
 				}
 				if ( FD_ISSET(in, &rset) ) {
 
-						if ( 1 == isPasswd )
-								echo_off();
+//						if ( 1 == isPasswd )
+//								echo_off();
 
 						if ( 0 == read(in, sendLine, BUFSIZE) ) {
 									return ;	
 						}
 
 
-						if ( 1 == isPasswd ) {
-								echo_on();
-								isPasswd = 0;
-						}
+//						if ( 1 == isPasswd ) {
+//								echo_on();
+//								isPasswd = 0;
+//						}
 
 						if ( !strcmp(sendLine, "\n") ) {
 //								printf ( "n = %d\n", strlen(sendLine) );
