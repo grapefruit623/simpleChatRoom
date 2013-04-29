@@ -25,7 +25,7 @@ const char yourName[BUFFSIZE] = ">>Login:\0";
 const char yourPasswd[BUFFSIZE] = ">>Password:\0";
 const char youAreNotUser[BUFFSIZE] = ">>There is no this account\n\0";
 const char yourAreLogout[BUFFSIZE] = "Your Are Logout\n\0"; 
-const char youAreOnline[BUFFSIZE] = "Your Are on-line, in cmd mode\n\0";
+const char youAreOnline[BUFFSIZE] = ">>Your Are on-line, in cmd mode\n\0";
 const char youHaveBeenOnline[BUFFSIZE] = "You have been on-line\n\0";
 const char cmdPrompt[BUFFSIZE] = ">>\0";
 /* 
@@ -156,11 +156,14 @@ requestHandler( int sockfd, char *incomingMes)
 										write(sockfd, "\n", strlen("\n")); 
 								}
 						}
+						write(sockfd, cmdPrompt, strlen(cmdPrompt));
 						return 1;
 				}                               
 
 
 				bzero(cmdBuf, strlen(cmdBuf));
+				bzero(cmd, strlen(cmd));
+				bzero(userSay, strlen(userSay));
 				strcpy(cmdBuf, incomingMes);
 				for ( i=0; i<strlen(cmdBuf) ;i++ ) {
 
@@ -186,7 +189,7 @@ requestHandler( int sockfd, char *incomingMes)
 											( cmdMode == allUsers[i].stage || chatMode == allUsers[i].stage ) ) {
 										write(sockfd, cmdPrompt, strlen(cmdPrompt));
 										write(allUsers[i].socket, userSay, strlen(userSay));
-										write(sockfd, "\n", strlen("\n")); 
+//										write(sockfd, "\n", strlen("\n")); 
 								}
 						}
 						return 1;
@@ -222,7 +225,7 @@ requestHandler( int sockfd, char *incomingMes)
 												strcat(cmdBuf, allUsers[sockfd].name);
 												write(allUsers[i].socket, cmdPrompt, strlen(cmdPrompt));
 												write(allUsers[i].socket, cmdBuf, strlen(cmdBuf));
-												write(allUsers[i].socket, "\n", strlen("\n")); 
+//												write(allUsers[i].socket, "\n", strlen("\n")); 
 												return 1;
 										}
 										else {
@@ -230,6 +233,7 @@ requestHandler( int sockfd, char *incomingMes)
 												printf ( "%d %s %d\n", i, allUsers[i].name, allUsers[i].stage );
 												write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
 												write(sockfd, "\n", strlen("\n")); 
+												write(sockfd, cmdPrompt, strlen(cmdPrompt));
 												return 1;
 										}
 								}
@@ -239,6 +243,7 @@ requestHandler( int sockfd, char *incomingMes)
 						return 1;
 
 				}
+				write(sockfd, cmdPrompt, strlen(cmdPrompt));
                                                 /* echo */
 //				write(sockfd, cmdPrompt, strlen(cmdPrompt));
 //				write(sockfd, incomingMes, strlen(incomingMes));
