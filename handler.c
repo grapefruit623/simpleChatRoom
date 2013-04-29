@@ -226,21 +226,23 @@ requestHandler( int sockfd, char *incomingMes)
 												return 1;
 										}
 										else {
-												if (  offLine == allUsers[i].stage ) {
-														write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
-														write(sockfd, "\n", strlen("\n")); 
-														return 1;
-												}
+												printf ( "not on-line\n" );
+												printf ( "%d %s %d\n", i, allUsers[i].name, allUsers[i].stage );
+												write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
+												write(sockfd, "\n", strlen("\n")); 
+												return 1;
 										}
 								}
 						}
+						write(sockfd, "he/she not on-line", strlen("he/she not on-line"));
+						write(sockfd, "\n", strlen("\n")); 
 						return 1;
 
 				}
                                                 /* echo */
-				write(sockfd, cmdPrompt, strlen(cmdPrompt));
-				write(sockfd, incomingMes, strlen(incomingMes));
-				write(sockfd, "\n", strlen("\n"));
+//				write(sockfd, cmdPrompt, strlen(cmdPrompt));
+//				write(sockfd, incomingMes, strlen(incomingMes));
+//				write(sockfd, "\n", strlen("\n"));
 
 				return 1;
 		}
